@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
@@ -40,6 +41,8 @@ import crystal.model.Relationship;
 import crystal.util.JMultiLineToolTip;
 import crystal.util.RunIt;
 import crystal.util.SpringLayoutUtility;
+import crystal.util.TimeUtility;
+import crystal.util.RunIt.Output;
 
 /**
  * Conflict Client UI; displays the view showing the state of the repositories contained in the preferences.
@@ -535,6 +538,44 @@ public class ConflictClient implements ConflictDaemon.ComputationListener {
 						icon = errorRelation.getIcon();
 					}
 					current.setIcon(icon);
+////////////////////////////////////////////////////////////////////////////////////////////////////			
+					
+					String mine = projPref.getProjectCheckoutLocation(projPref.getEnvironment());
+					String yours = projPref.getProjectCheckoutLocation(source);
+					String tempMyName = "tempMine_" + TimeUtility.getCurrentLSMRDateString();
+					String executablePath = null;
+					String tempWorkPath = projPref.getClientPreferences().getTempDirectory() + "image";
+					Output output;
+					
+					if (kind.equals(RepoKind.HG))
+						executablePath = projPref.getClientPreferences().getHgPath();
+					else if (kind.equals(RepoKind.GIT))
+						executablePath = projPref.getClientPreferences().getGitPath();
+				
+					String[] myArgs = { "clone", mine, tempMyName };
+					try {
+						output = RunIt.execute(executablePath, myArgs, tempWorkPath, false);
+					} catch (IOException e2) {
+						//should have been checked in previous relationship calculation
+					}
+					String[] pullArgs = { "pull", yours };
+					try {
+						output = RunIt.execute(executablePath, pullArgs, tempWorkPath + tempMyName, false);
+						if (kind.equals(RepoKind.GIT)) {
+							_log.info("\n path: " + tempWorkPath + tempMyName);
+							_log.info("\n pull output: " + output.getOutput());
+						}
+					} catch (IOException e2) {
+						//should have been checked in previous relationship calculation
+					}
+					
+/* Joe's part start*/					
+					
+					
+					
+/* Joe's part end*/
+					RunIt.deleteDirectory(new File(tempWorkPath + tempMyName));
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
 					
 					Relationship relationship = result.getRelationship();
