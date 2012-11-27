@@ -157,7 +157,7 @@ public class CalculateProjectTask extends SwingWorker<Void, Result> {
 		        }
 		        _log.trace("Finished computing the guidance for the " + _prefs.getName() + "project");
 		    } else {
-		        _log.trace("My repo history couldn't be parsed, so I did not cimpute guidance for the " + _prefs.getName() + "project");
+		        _log.trace("My repo history couldn't be parsed, so I did not compute guidance for the " + _prefs.getName() + "project");
 		    }
 		} catch (Exception e) {
 		    _log.error("Error while computing the guidance.  (This message is expected if there is an X error icon.)\nCaught a " + e.getClass().getName() + " with the message \"" + e.getMessage() + "\"");		  

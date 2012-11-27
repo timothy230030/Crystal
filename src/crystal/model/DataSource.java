@@ -49,7 +49,7 @@ public class DataSource implements Cloneable{
     /**
      * Creates a new DataSource
      * @param shortName: the name of this repository
-     * @param cloneStrong: the path to the remote repository
+     * @param cloneString: the path to the remote repository
      * @param repoKind: the kind of this repository
      * @param hide: false if this repository should not be shown in Crystal's view
      * @param parent: the name of the parent repository

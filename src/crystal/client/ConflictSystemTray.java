@@ -334,7 +334,7 @@ public class ConflictSystemTray implements ComputationListener {
 	}
 
 	/**
-	 * A listener for clicking the menu to enable the deamon.
+	 * A listener for clicking the menu to enable the daemon.
 	 */
 	public void daemonAbleAction() {
 		if (!ConflictDaemon.getInstance().isEnabled()) {
@@ -384,7 +384,7 @@ public class ConflictSystemTray implements ComputationListener {
 	}
 
 	/**
-	 * If the deamon is not running, does nothing. If the deamon is running, creates a new executor and performs the calculations on all repos of all projects of the current
+	 * If the daemon is not running, does nothing. If the deamon is running, creates a new executor and performs the calculations on all repos of all projects of the current
 	 * configuration.
 	 */
 	public void performCalculations() {
@@ -421,6 +421,7 @@ public class ConflictSystemTray implements ComputationListener {
 			// # ex.execute(cpt);
 			cpt.execute();
 		}
+		
 	}
 
 	/**

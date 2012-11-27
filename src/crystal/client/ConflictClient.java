@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
@@ -34,10 +35,13 @@ import javax.swing.ToolTipManager;
 import org.apache.log4j.Logger;
 
 import crystal.Constants;
+import crystal.client.CalculateChangeTask.changeItem;
 import crystal.model.DataSource;
 import crystal.model.DataSource.RepoKind;
 import crystal.model.LocalStateResult;
 import crystal.model.Relationship;
+import crystal.util.ImageBuilder;
+//import crystal.util.ImageBuilder;
 import crystal.util.JMultiLineToolTip;
 import crystal.util.RunIt;
 import crystal.util.SpringLayoutUtility;
@@ -530,6 +534,85 @@ public class ConflictClient implements ConflictDaemon.ComputationListener {
 					String tip = result.getToolTipText();
 					ImageIcon icon = result.getIcon();
 					
+					if(result.equals(Relationship.MERGECLEAN)){
+						
+						
+						RepoKind kind = source.getKind();
+						String mine = projPref.getProjectCheckoutLocation(projPref.getEnvironment());
+						String yours = projPref.getProjectCheckoutLocation(source);
+						String tempMyName = "tempMine_" + TimeUtility.getCurrentLSMRDateString();
+						String tempYourName = "tempYour_" + TimeUtility.getCurrentLSMRDateString();
+						String tempMergedName = "tempMerge_" + TimeUtility.getCurrentLSMRDateString();
+						String executablePath = null;
+						String tempWorkPath = projPref.getClientPreferences().getTempDirectory() + "image";
+						Output output;
+						
+						String[] mkdirArgs = { "image"};
+						try{
+						RunIt.execute("mkdir", mkdirArgs, projPref.getClientPreferences().getTempDirectory(), false);
+						}catch(IOException e1){
+						
+						}
+						
+						if (kind.equals(RepoKind.HG))
+							executablePath = projPref.getClientPreferences().getHgPath();
+						else if (kind.equals(RepoKind.GIT))
+							executablePath = projPref.getClientPreferences().getGitPath();
+					
+						String[] myArgs = { "clone", mine, tempMyName };
+						try {
+							output = RunIt.execute(executablePath, myArgs, tempWorkPath, false);
+						} catch (IOException e2) {
+							//should have been checked in previous relationship calculation
+						}
+						
+						String[] yourArgs = { "clone", yours, tempYourName };
+						try {
+							output = RunIt.execute(executablePath, yourArgs, tempWorkPath, false);
+						} catch (IOException e2) {
+							//should be done
+						}
+						
+						String[] mergeArgs = { "clone", mine, tempMergedName };
+						try {
+							output = RunIt.execute(executablePath, mergeArgs, tempWorkPath, false);
+						} catch (IOException e2) {
+							//should be done
+						}
+						
+						
+						String[] pullArgs = { "pull", yours };
+						try {
+							output = RunIt.execute(executablePath, pullArgs, tempWorkPath + tempMergedName, false);
+							if (kind.equals(RepoKind.GIT)) {
+								_log.info("\n path: " + tempWorkPath + tempMergedName);
+								_log.info("\n pull output: " + output.getOutput());
+							}
+						} catch (IOException e2) {
+							//should have been checked in previous relationship calculation
+						}
+						
+						String[] hgMergeArgs = { "merge", "--noninteractive" };
+						try {
+							if (kind.equals(RepoKind.HG))
+								output = RunIt.execute(executablePath, hgMergeArgs, tempWorkPath + tempMergedName, false);
+						} catch (IOException e2) {
+							//
+						}
+						//Joe's part start
+						try{
+						ImageBuilder ib = new ImageBuilder(tempWorkPath + tempMyName, "something");
+						
+						ib = new ImageBuilder(tempWorkPath + tempYourName, "something");
+						
+						ib = new ImageBuilder(tempWorkPath + tempMergedName, "something");
+						}catch(IOException e2){
+						
+						}
+						//Joe's part end
+						
+						RunIt.deleteDirectory(new File(tempWorkPath));
+					}
 					
 					RepoKind kind = source.getKind();
 					if((kind.equals(RepoKind.HG) && _preferences.getHgPath() == null)
@@ -539,42 +622,16 @@ public class ConflictClient implements ConflictDaemon.ComputationListener {
 					}
 					current.setIcon(icon);
 ////////////////////////////////////////////////////////////////////////////////////////////////////			
+
 					
-					String mine = projPref.getProjectCheckoutLocation(projPref.getEnvironment());
-					String yours = projPref.getProjectCheckoutLocation(source);
-					String tempMyName = "tempMine_" + TimeUtility.getCurrentLSMRDateString();
-					String executablePath = null;
-					String tempWorkPath = projPref.getClientPreferences().getTempDirectory() + "image";
-					Output output;
-					
-					if (kind.equals(RepoKind.HG))
-						executablePath = projPref.getClientPreferences().getHgPath();
-					else if (kind.equals(RepoKind.GIT))
-						executablePath = projPref.getClientPreferences().getGitPath();
-				
-					String[] myArgs = { "clone", mine, tempMyName };
-					try {
-						output = RunIt.execute(executablePath, myArgs, tempWorkPath, false);
-					} catch (IOException e2) {
-						//should have been checked in previous relationship calculation
-					}
-					String[] pullArgs = { "pull", yours };
-					try {
-						output = RunIt.execute(executablePath, pullArgs, tempWorkPath + tempMyName, false);
-						if (kind.equals(RepoKind.GIT)) {
-							_log.info("\n path: " + tempWorkPath + tempMyName);
-							_log.info("\n pull output: " + output.getOutput());
-						}
-					} catch (IOException e2) {
-						//should have been checked in previous relationship calculation
-					}
+//					ArrayList<changeItem> changeResult = CalculateChangeTask.performTask(projPref);
 					
 /* Joe's part start*/					
-					
+//					ImageBuilder IB = new ImageBuilder(tempWorkPath+tempMyName, );
 					
 					
 /* Joe's part end*/
-					RunIt.deleteDirectory(new File(tempWorkPath + tempMyName));
+					
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
 					

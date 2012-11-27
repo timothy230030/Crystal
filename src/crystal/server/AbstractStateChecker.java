@@ -527,7 +527,7 @@ public abstract class AbstractStateChecker {
 			// source.setEnabled(false);
 			return Relationship.ERROR + " " + errorMsg;
 		}
-		// Clean up temp directories:
+		// Clean up teme`p directories:
 		if (kind.equals(RepoKind.GIT))
 			_log.info("the relationship: " + answer);
 		RunIt.deleteDirectory(new File(tempWorkPath + tempMyName));

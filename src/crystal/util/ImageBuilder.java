@@ -22,9 +22,9 @@ public class ImageBuilder {
 	private static Vector<String> image_list = new Vector<String>();
 	private static Vector<Boolean> img_write = new Vector<Boolean>();
 	//public static String dir = "/nfs/none/users2/joechiu/"; 
-	public static String dir = "/Users/joechiu/Dropbox/IVCS/"; 
+	public static String dir = "/Users/Timothy/Dropbox"; 
 	
-	public static void main(String[] args) throws IOException {
+/*	public static void main(String[] args) throws IOException {
 		String filename = "/Users/joechiu/Dropbox/IVCS/Mytest.java";
 		String log = "change image";
 		
@@ -40,7 +40,7 @@ public class ImageBuilder {
 		{
 			build(filename);
 		}
-	}
+	}*/
 	
 	public void ImageFileBuilder(String filename, String log) throws IOException
 	{
@@ -58,13 +58,20 @@ public class ImageBuilder {
 		}
 	}
 	
-	public void ImageDirBuilder(String delpath, String log) throws IOException
+	public void ImageDirBuilder(String delpath,  ArrayList<String> changedFiles, ArrayList<String> log) throws IOException
 	{	
 		try {
 		      File file = new File(delpath);
 		      if (!file.isDirectory()) 
 		      {
-		    	  ImageFileBuilder(file.getName(),log);
+		    	  for(int k=0;k<changedFiles.size();k++)
+		    	  {
+		    		  if(file.getAbsolutePath().compareTo(delpath+changedFiles.get(k)) == 1)
+		    		  {
+		    			  ImageFileBuilder(file.getName(),log.remove(k));
+		    			  break;
+		    		  }
+		    	  }
 		      }
 		      else if (file.isDirectory()) 
 		      {
@@ -74,13 +81,19 @@ public class ImageBuilder {
 		    		  File childfile = new File(delpath + "\\" + filelist[i]);
 		    		  if (!childfile.isDirectory()) 
 		    		  {
-		    			  ImageFileBuilder(childfile.getName(),log);
+		    			  for(int k=0;k<changedFiles.size();k++)
+				    	  {
+				    		  if(childfile.getAbsolutePath().compareTo(delpath+changedFiles.get(k)) == 1)
+				    		  {
+				    			  ImageFileBuilder(childfile.getName(),log.remove(k));
+				    			  break;
+				    		  }
+				    	  }
 		    		  }
 		    		  else if (childfile.isDirectory()) {
-		    			  ImageDirBuilder(delpath + "\\" + filelist[i], log);
+		    			  ImageDirBuilder(delpath + "\\" + filelist[i], changedFiles, log);
 		    		  }
 		    	  }
-		    	  ImageFileBuilder(file.getName(),log);
 		      }
 		    }
 		    catch (FileNotFoundException e) {
@@ -88,9 +101,9 @@ public class ImageBuilder {
 		    }
 	}
 	
-	public ImageBuilder(String delpath, String log) throws IOException
+	public ImageBuilder(String delpath,  ArrayList<String> changedFiles, ArrayList<String> log) throws IOException
 	{
-		ImageDirBuilder(delpath, log);
+		ImageDirBuilder(delpath, changedFiles, log);
 	}
 	
 	public static void build(String filename){
