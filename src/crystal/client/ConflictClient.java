@@ -35,7 +35,8 @@ import javax.swing.ToolTipManager;
 import org.apache.log4j.Logger;
 
 import crystal.Constants;
-import crystal.client.CalculateChangeTask.changeItem;
+import crystal.client.CalculateChangeTask;
+import crystal.client.CalculateChangeTask.ChangeItem;
 import crystal.model.DataSource;
 import crystal.model.DataSource.RepoKind;
 import crystal.model.LocalStateResult;
@@ -533,18 +534,16 @@ public class ConflictClient implements ConflictDaemon.ComputationListener {
 					
 					String tip = result.getToolTipText();
 					ImageIcon icon = result.getIcon();
-					
+	////////////////////////////////////////////////////////////////////////////////////////////////////////				
 					if(result.equals(Relationship.MERGECLEAN)){
 						
 						
 						RepoKind kind = source.getKind();
 						String mine = projPref.getProjectCheckoutLocation(projPref.getEnvironment());
 						String yours = projPref.getProjectCheckoutLocation(source);
-						String tempMyName = "tempMine_" + TimeUtility.getCurrentLSMRDateString();
-						String tempYourName = "tempYour_" + TimeUtility.getCurrentLSMRDateString();
-						String tempMergedName = "tempMerge_" + TimeUtility.getCurrentLSMRDateString();
+						String tempMergedName = projectSource.getShortName() + "_" + source.getShortName();
 						String executablePath = null;
-						String tempWorkPath = projPref.getClientPreferences().getTempDirectory() + "image";
+						String tempWorkPath = projPref.getClientPreferences().getTempDirectory() + "image/";
 						Output output;
 						
 						String[] mkdirArgs = { "image"};
@@ -558,29 +557,30 @@ public class ConflictClient implements ConflictDaemon.ComputationListener {
 							executablePath = projPref.getClientPreferences().getHgPath();
 						else if (kind.equals(RepoKind.GIT))
 							executablePath = projPref.getClientPreferences().getGitPath();
-					
-						String[] myArgs = { "clone", mine, tempMyName };
+						
+					// clones my project to a file: tempFileDirectory/image/NameofMyRepository
+						
+						String[] myArgs = { "clone", mine, projectSource.getShortName() };
 						try {
 							output = RunIt.execute(executablePath, myArgs, tempWorkPath, false);
 						} catch (IOException e2) {
 							//should have been checked in previous relationship calculation
 						}
-						
-						String[] yourArgs = { "clone", yours, tempYourName };
+						//clones your project to a file: tempFileDirectory/image/Name of Your Repository
+						String[] yourArgs = { "clone", yours, source.getShortName() };
 						try {
 							output = RunIt.execute(executablePath, yourArgs, tempWorkPath, false);
 						} catch (IOException e2) {
 							//should be done
 						}
-						
+						//clones my project to a file: tempFileDirectory/image/MyRepo_YourRepo
 						String[] mergeArgs = { "clone", mine, tempMergedName };
 						try {
-							output = RunIt.execute(executablePath, mergeArgs, tempWorkPath, false);
+							output = RunIt.execute(executablePath, mergeArgs, tempWorkPath + tempMergedName, false);
 						} catch (IOException e2) {
 							//should be done
 						}
-						
-						
+						//pulls in your project to merged with mine						
 						String[] pullArgs = { "pull", yours };
 						try {
 							output = RunIt.execute(executablePath, pullArgs, tempWorkPath + tempMergedName, false);
@@ -599,15 +599,19 @@ public class ConflictClient implements ConflictDaemon.ComputationListener {
 						} catch (IOException e2) {
 							//
 						}
+						
 						//Joe's part start
 						try{
-						ImageBuilder ib = new ImageBuilder(tempWorkPath + tempMyName, "something");
+						//Aurora's part start
+						ChangeItem changeItem = CalculateChangeTask.performTask(executablePath, tempWorkPath + source.getShortName(), tempWorkPath + projectSource.getShortName());						
+						//Aurora's part end
+						ImageBuilder ib = new ImageBuilder(tempWorkPath + source.getShortName(), changeItem.changedFiles, changeItem.changedFilesContents);
 						
-						ib = new ImageBuilder(tempWorkPath + tempYourName, "something");
+						ib = new ImageBuilder(tempWorkPath + projectSource.getShortName(), changeItem.changedFiles, changeItem.changedFilesContents);
 						
-						ib = new ImageBuilder(tempWorkPath + tempMergedName, "something");
+						ib = new ImageBuilder(tempWorkPath + tempMergedName, changeItem.changedFiles, changeItem.changedFilesContents);
 						}catch(IOException e2){
-						
+						    System.err.println("IOException");
 						}
 						//Joe's part end
 						
@@ -621,18 +625,7 @@ public class ConflictClient implements ConflictDaemon.ComputationListener {
 						icon = errorRelation.getIcon();
 					}
 					current.setIcon(icon);
-////////////////////////////////////////////////////////////////////////////////////////////////////			
 
-					
-//					ArrayList<changeItem> changeResult = CalculateChangeTask.performTask(projPref);
-					
-/* Joe's part start*/					
-//					ImageBuilder IB = new ImageBuilder(tempWorkPath+tempMyName, );
-					
-					
-/* Joe's part end*/
-					
-////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
 					
 					Relationship relationship = result.getRelationship();

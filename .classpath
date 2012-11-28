@@ -8,5 +8,6 @@
 	<classpathentry kind="lib" path="C:/Users/Timothy/Dropbox/2012 Fall courses/Software Engineering/IVCS/junit-4.8.1.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Timothy/Dropbox/2012 Fall courses/Software Engineering/IVCS/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Timothy/Dropbox/2012 Fall courses/Software Engineering/IVCS/one-jar-ant-task-0.97.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Timothy/Dropbox/2012 Fall courses/Software Engineering/IVCS/diffutils-1.2.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
